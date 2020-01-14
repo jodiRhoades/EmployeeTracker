@@ -49,11 +49,11 @@ function editDepartment() {
     .prompt({
       name: "editDept",
       type: "list",
-      message: "Would you like to [ADD], [VIEW], or [UPDATE] a department?",
+      message: "Would you like to [ADD], [VIEW], or [UPDATE] a Department?",
       choices: ["ADD", "VIEW","UPDATE", "EXIT"]
     })
     .then(function(answer) {
-      // based on their answer, either call the ADD, VIEW or UPDATE functions for department
+      // based on their answer, either call the ADD, VIEW or UPDATE functions for Department
       if (answer.editDept === "ADD") {
         addDepartment();
       }
@@ -68,6 +68,58 @@ function editDepartment() {
       }
     });
 }
+
+function editRole() {
+  inquirer
+    .prompt({
+      name: "editRole",
+      type: "list",
+      message: "Would you like to [ADD], [VIEW], or [UPDATE] a Role?",
+      choices: ["ADD", "VIEW","UPDATE", "EXIT"]
+    })
+    .then(function(answer) {
+      // based on their answer, either call the ADD, VIEW or UPDATE functions for Role
+      if (answer.editRole === "ADD") {
+        addDepartment();
+      }
+      else if(answer.editRole === "VIEW") {
+        addDepartment();
+      } 
+      else if(answer.editRole === "UPDATE") {
+        addDepartment();
+      } 
+      else{
+        connection.end();
+      }
+    });
+}
+
+function editEmployee() {
+  inquirer
+    .prompt({
+      name: "editEmployee",
+      type: "list",
+      message: "Would you like to [ADD], [VIEW], or [UPDATE] an Employee?",
+      choices: ["ADD", "VIEW","UPDATE", "EXIT"]
+    })
+    .then(function(answer) {
+      // based on their answer, either call the ADD, VIEW or UPDATE functions for Employee
+      if (answer.editEmployee === "ADD") {
+        addDepartment();
+      }
+      else if(answer.editEmployee === "VIEW") {
+        addDepartment();
+      } 
+      else if(answer.editEmployee === "UPDATE") {
+        addDepartment();
+      } 
+      else{
+        connection.end();
+      }
+    });
+}
+
+
 //-----------------Placeholder---------------------------//
 
 
