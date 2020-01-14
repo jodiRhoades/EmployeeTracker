@@ -1,17 +1,18 @@
 -- to create database
+DROP DATABASE employee_trackerDB;
 
-CREATE DATABASE employee_tracker_DB;
+CREATE DATABASE employee_trackerDB;
 
 USE employee_trackerDB;
 
 CREATE TABLE department (
-  id INT NOT NULL AUTO-INCREMENT,
+  id INT AUTO_INCREMENT NOT NULL,
   name VARCHAR(30) NULL,  
   PRIMARY KEY (id)
 );
 
 CREATE TABLE role (
-  id INT AUTO-INCREMENT NOT NULL,
+  id INT AUTO_INCREMENT NOT NULL,
   title VARCHAR(30),
   salary DECIMAL(10),
   department_id INT,  
@@ -20,13 +21,13 @@ CREATE TABLE role (
 );
 
 CREATE TABLE employee (
-  id INT AUTO-INCREMENT NOT NULL,
+  id INT AUTO_INCREMENT NOT NULL,
   first_name VARCHAR(30),  
   last_name VARCHAR(30),
   role_id INT,
   manager_id INT,
-  PRIMARY KEY (id)
-  FOREIGN KEY (role_id) REFERENCES role(roleID)
+  PRIMARY KEY (id),
+  FOREIGN KEY (role_id) REFERENCES role(roleID),
   FOREIGN KEY (manager_id) REFERENCES role(managerID)
 );
 
