@@ -46,7 +46,7 @@ function start() {
       }
     });
 }
-
+//Next four functions are for options with the DEPARTMENT Table
 function editDepartment() {
   inquirer
     .prompt([
@@ -90,7 +90,9 @@ function addDept() {
       )
     });
 }
-function viewDept() {  
+
+//--------------MALFUNCTION============viewDept Runs code but stops after the prompt with no response-----------
+function viewDept() {
   connection.query("SELECT * FROM department", function (err, res) {
     if (err) throw err;
     // Log all results of the SELECT statement
@@ -98,11 +100,23 @@ function viewDept() {
     connection.end();
   });
 }
-//-----------------Placeholder---------------------------//
+//--------------MALFUNCTION============updateDept Runs code but stops after the prompt with no response-----------
+function updateDept() {
+  connection.query("UPDATE department SET ? WHERE ?",
+    [
+      {
+        name: name
+      }
+    ],
+    function (err, res) {
+      if (err) throw err;
+      console.log(res.affectedRows + " department updated!\n");
+    }
+  );
+}
 
-
-
-/*function editRole() {
+//Next four functions are for options with the ROLE Table
+function editRole() {
   inquirer
     .prompt({
       name: "editRole",
@@ -126,8 +140,56 @@ function viewDept() {
       }
     });
 }
-
-/*function editEmployee() {
+function addRole() {
+  //ask for new department name
+  inquirer
+    .prompt([
+      {
+        name: "newRole",
+        type: "input",
+        message: "What's the name of the New Role you would like to add?"
+      },
+    ])
+    .then(function (answer) {
+      // when finished prompting, insert a new role into the db with that info
+      connection.query(
+        "INSERT INTO role SET ?",
+        {
+          name: answer.newRole,
+        },
+        function (err) {
+          if (err) throw err;
+          console.log("Congratulations, your new role " + answer.newRole + " was added.");
+          start();
+        }
+      )
+    });
+}
+//--------------MALFUNCTION============viewDept Runs code but stops after the prompt with no response-----------
+function viewRole() {
+  connection.query("SELECT * FROM role", function (err, res) {
+    if (err) throw err;
+    // Log all results of the SELECT statement
+    console.log(res);
+    connection.end();
+  });
+}
+//--------------MALFUNCTION============updateDept Runs code but stops after the prompt with no response-----------
+function updateDept() {
+  connection.query("UPDATE role SET ? WHERE ?",
+    [
+      {
+        name: name
+      }
+    ],
+    function (err, res) {
+      if (err) throw err;
+      console.log(res.affectedRows + " role updated!\n");
+    }
+  );
+}
+//Next four functions are for options with the EMPLOYEE Table
+function editEmployee() {
   inquirer
     .prompt({
       name: "editEmployee",
@@ -149,26 +211,87 @@ function viewDept() {
       else{
         connection.end();
       }
-    })
+    }
+    )
+  }
+  function addEmp() {
+    //ask for new department name
+    inquirer
+      .prompt([
+        {
+          name: "newEmp",
+          type: "input",
+          message: "What's the first name of the New Employee you would like to add?"
+        },
+        {
+          name: "newEmp",
+          type: "input",
+          message: "What's the last name of the New Employee you would like to add?"
+        },
+        {
+          name: "newEmp",
+          type: "input",
+          message: "What's the role_id of the New Employee you would like to add?"
+        },
+        {
+          name: "newEmp",
+          type: "input",
+          message: "What's the manager_id of the New Employee you would like to add?"
+        }
+      ])
+      .then(function (answer) {
+        // when finished prompting, insert a new employee into the db with that info
+        connection.query(
+          "INSERT INTO employee SET ?",
+          {
+            first_name: first_name,
+            last_name: last_name,
+            role: role_id,
+            manager: manager_id
+          },
+          function (err) {
+            if (err) throw err;
+            console.log("Congratulations, your new employee " + answer.newEmp + " was added.");
+            start();
+          }
+        )
+      });
+  }
+  
+  //--------------MALFUNCTION============viewDept Runs code but stops after the prompt with no response-----------
+  function viewEmp() {
+    connection.query("SELECT * FROM employee", function (err, res) {
+      if (err) throw err;
+      // Log all results of the SELECT statement
+      console.log(res);
+      connection.end();
+    });
+  }
+  //--------------MALFUNCTION============updateDept Runs code but stops after the prompt with no response-----------
+  function updateEmp() {
+    connection.query("UPDATE employee SET ? WHERE ?",
+      [
+        {
+          first_name: first_name
+        },
+        {
+          last_name: last_name           
+        },
+        {
+          role: role_id
+        },
+        {
+          manager: manager_id
+        }
+      ],
+      function (err, res) {
+        if (err) throw err;
+        console.log(res.affectedRows + " department updated!\n");
+      }
+    );
   }
 
 
 
 
 
-      //-----------------------------------HALF OF OTHER FUNTION-------
-      /*.then(function(answer) {
-        // based on their answer, either call the add, view or update functions
-        if (answer.editORview === "ADD") {
-          addEmployee();
-        }
-        else if(answer.editORview === "UPDATE") {
-          updateEmployee();
-        }
-        else if(answer.editORview === "VIEW") {
-            viewEmployee();
-        } else{
-          connection.end();
-        }
-
-      });*/
