@@ -1,7 +1,7 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
 var ctable = require("console.table");
-
+var util = require("util")
 
 var connection = mysql.createConnection({
   host: "localhost",
@@ -28,7 +28,7 @@ function start() {
         name: "editORview",
         type: "list",
         message: "Would you like to add, view, or update a Department, Role or an Employee?",
-        choices: ["DEPARTMENT", "ROLE", "EMPLOYEE", "EXIT"]
+        choices: ["DEPARTMENT", "ROLE", "EMPLOYEE"]
       }
     ])
     .then(function (answer) {
@@ -39,22 +39,22 @@ function start() {
       else if (answer.editORview === "ROLE") {
         editRole();
       }
-      else if (answer.editORview === "Employee") {
+      else if (answer.editORview === "EMPLOYEE") {
         editEmployee();
       } else {
         connection.end();
       }
     });
 }
-//Next four functions are for options with the DEPARTMENT Table
+//Next 3 functions are for options with the DEPARTMENT Table
 function editDepartment() {
   inquirer
     .prompt([
       {
         name: "editDept",
         type: "list",
-        message: "Would you like to [ADD], [VIEW], or [UPDATE] a Department?",
-        choices: ["ADD", "VIEW", "UPDATE", "EXIT"]
+        message: "Would you like to [ADD] or [VIEW] a Department?",
+        choices: ["ADD", "VIEW"]
       }
     ])
     .then(function (answer) {
@@ -62,9 +62,11 @@ function editDepartment() {
       if (answer.editDept === "ADD") {
         addDept();
       }
+      if (answer.editDept === "VIEW") {
+        viewDept()
+      }      
     });
 }
-
 function addDept() {
   //ask for new department name
   inquirer
@@ -90,104 +92,91 @@ function addDept() {
       )
     });
 }
-
-//--------------MALFUNCTION============viewDept Runs code but stops after the prompt with no response-----------
 function viewDept() {
   connection.query("SELECT * FROM department", function (err, res) {
     if (err) throw err;
     // Log all results of the SELECT statement
-    console.log(res);
-    connection.end();
+    console.table(res);
+    start();
   });
 }
-//--------------MALFUNCTION============updateDept Runs code but stops after the prompt with no response-----------
-function updateDept() {
-  connection.query("UPDATE department SET ? WHERE ?",
-    [
-      {
-        name: name
-      }
-    ],
-    function (err, res) {
-      if (err) throw err;
-      console.log(res.affectedRows + " department updated!\n");
-    }
-  );
-}
 
-//Next four functions are for options with the ROLE Table
+//Next 3 functions are for options with the ROLE Table
 function editRole() {
   inquirer
     .prompt({
       name: "editRole",
       type: "list",
-      message: "Would you like to [ADD], [VIEW], or [UPDATE] a Role?",
-      choices: ["ADD", "VIEW","UPDATE", "EXIT"]
+      message: "Would you like to [ADD], or [VIEW] a Role?",
+      choices: ["ADD", "VIEW"]
     })
-    .then(function(answer) {
+    .then(function (answer) {
       // based on their answer, either call the ADD, VIEW or UPDATE functions for Role
       if (answer.editRole === "ADD") {
         addRole();
       }
-      else if(answer.editRole === "VIEW") {
+      else if (answer.editRole === "VIEW") {
         viewRole();
-      }
-      else if(answer.editRole === "UPDATE") {
-        updateRole();
-      }
-      else{
-        connection.end();
-      }
+      }      
     });
 }
 function addRole() {
-  //ask for new department name
-  inquirer
-    .prompt([
-      {
-        name: "newRole",
-        type: "input",
-        message: "What's the name of the New Role you would like to add?"
-      },
-    ])
-    .then(function (answer) {
-      // when finished prompting, insert a new role into the db with that info
-      connection.query(
-        "INSERT INTO role SET ?",
-        {
-          name: answer.newRole,
-        },
-        function (err) {
-          if (err) throw err;
-          console.log("Congratulations, your new role " + answer.newRole + " was added.");
-          start();
-        }
-      )
-    });
+  //ask for new role name
+  connection.query(
+    "Select department.id, department.name From department", (err, departs) => {
+
+      const departChoices = departs.map(({ id, name }) => ({
+        name: name,
+        value: id
+      }))
+      inquirer
+        .prompt([
+          {
+            name: "newRole",
+            type: "input",
+            message: "What's the name of the New Role you would like to add?"
+          },
+          {
+            name: "newPay",
+            type: "input",
+            message: "What's the salary of the New Role you would like to add?"
+          },
+          {
+            name: "depart",
+            type: "list",
+            message: "What's the department of the New Role you would like to add?",
+            choices: departChoices
+          },
+
+        ])
+        .then(function (answer) {
+          // when finished prompting, insert a new role into the db with that info
+          connection.query(
+            "INSERT INTO role SET ?",
+            {
+              title: answer.newRole,
+              salary: answer.newPay,
+              department_id: parseFloat(answer.depart).toFixed(2)
+            },
+            function (err) {
+              if (err) throw err;
+              console.log("Congratulations, your new role " + answer.newRole + " was added.");
+              start();
+            }
+          )
+        });
+    })
 }
-//--------------MALFUNCTION============viewDept Runs code but stops after the prompt with no response-----------
+
 function viewRole() {
   connection.query("SELECT * FROM role", function (err, res) {
     if (err) throw err;
     // Log all results of the SELECT statement
-    console.log(res);
-    connection.end();
+    console.table(res);
+    start()
   });
 }
-//--------------MALFUNCTION============updateDept Runs code but stops after the prompt with no response-----------
-function updateDept() {
-  connection.query("UPDATE role SET ? WHERE ?",
-    [
-      {
-        name: name
-      }
-    ],
-    function (err, res) {
-      if (err) throw err;
-      console.log(res.affectedRows + " role updated!\n");
-    }
-  );
-}
+
 //Next four functions are for options with the EMPLOYEE Table
 function editEmployee() {
   inquirer
@@ -195,101 +184,206 @@ function editEmployee() {
       name: "editEmployee",
       type: "list",
       message: "Would you like to [ADD], [VIEW], or [UPDATE] an Employee?",
-      choices: ["ADD", "VIEW","UPDATE", "EXIT"]
+      choices: ["ADD", "VIEW", "UPDATE"]
     })
-    .then(function(answer) {
+    .then(function (answer) {
       // based on their answer, either call the ADD, VIEW or UPDATE functions for Employee
       if (answer.editEmployee === "ADD") {
         addEmp();
       }
-      else if(answer.editEmployee === "VIEW") {
+      else if (answer.editEmployee === "VIEW") {
         viewEmp();
       }
-      else if(answer.editEmployee === "UPDATE") {
+      else if (answer.editEmployee === "UPDATE") {
         updateEmp();
-      }
-      else{
-        connection.end();
-      }
-    }
-    )
-  }
-  function addEmp() {
-    //ask for new department name
-    inquirer
-      .prompt([
-        {
-          name: "newEmp",
-          type: "input",
-          message: "What's the first name of the New Employee you would like to add?"
-        },
-        {
-          name: "newEmp",
-          type: "input",
-          message: "What's the last name of the New Employee you would like to add?"
-        },
-        {
-          name: "newEmp",
-          type: "input",
-          message: "What's the role_id of the New Employee you would like to add?"
-        },
-        {
-          name: "newEmp",
-          type: "input",
-          message: "What's the manager_id of the New Employee you would like to add?"
-        }
-      ])
-      .then(function (answer) {
-        // when finished prompting, insert a new employee into the db with that info
-        connection.query(
-          "INSERT INTO employee SET ?",
-          {
-            first_name: first_name,
-            last_name: last_name,
-            role: role_id,
-            manager: manager_id
-          },
-          function (err) {
-            if (err) throw err;
-            console.log("Congratulations, your new employee " + answer.newEmp + " was added.");
-            start();
-          }
-        )
-      });
-  }
-  
-  //--------------MALFUNCTION============viewDept Runs code but stops after the prompt with no response-----------
-  function viewEmp() {
-    connection.query("SELECT * FROM employee", function (err, res) {
-      if (err) throw err;
-      // Log all results of the SELECT statement
-      console.log(res);
-      connection.end();
+      }      
     });
-  }
-  //--------------MALFUNCTION============updateDept Runs code but stops after the prompt with no response-----------
-  function updateEmp() {
-    connection.query("UPDATE employee SET ? WHERE ?",
-      [
-        {
-          first_name: first_name
+}
+connection.query = util.promisify(connection.query);
+function findRoles(){
+  return connection.query(
+    "SELECT role.id, role.title FROM role"
+  )
+}
+function findEmployees(){
+  return connection.query(
+    "SELECT employee.id, employee.first_name, employee.last_name FROM employee"
+  )
+}
+async function addEmp() {
+  //select which employee you want to update 
+  const employees = await findEmployees()
+    
+  inquirer
+    .prompt([
+      {
+        name: "newFirstEmp",
+        type: "input",
+        message: "What's the first name of the New Employee you would like to add?"
+      },
+      {
+        name: "newLastEmp",
+        type: "input",
+        message: "What's the last name of the New Employee you would like to add?"
+      },
+      {
+        name: "newRoleEmp",
+        type: "list",
+        message: "What's the role_id of the New Employee you would like to add?",
+        //loop through managers to see which one will be thiers if they have one     
+        choices: function () {
+          connection.query()
+          const jobChoices = [];
+          for (var i = 0; i < results.length; i++) {
+            jobChoices.push(results[i].role_id);
+          }
+          return jobChoices;
+        },      
+      },
+      {
+        name: "newEmpBoss",
+        type: "list",
+        message: "What's the manager_id of the New Employee you would like to add?",
+        choices: function () {
+          const bossChoices = [];
+          for (var i = 0; i < results.length; i++) {
+            bossChoices.push(results[i].role_id);
+          }
+          return bossChoices;
         },
-        {
-          last_name: last_name           
-        },
-        {
-          role: role_id
-        },
-        {
-          manager: manager_id
-        }
-      ],
-      function (err, res) {
-        if (err) throw err;
-        console.log(res.affectedRows + " department updated!\n");
       }
-    );
-  }
+    ])
+    .then(function (answer) {
+      // when finished prompting, insert a new employee into the db with that info
+      connection.query(
+        "INSERT INTO employee SET ?",
+        {
+          first_name: answer.newFirstEmp,
+          last_name: answer.newLastEmp,
+          role_id: answer.newRoleEmp,
+          manager_id: answer.newEmpBoss
+        },
+        function (err) {
+          if (err) throw err;
+          console.log(`Congratulations, your new employee ${answer.newFirstEmp} ${answer.newLastEmp} was added.`);
+          start();
+        }
+      )
+    });
+}
+function viewEmp() {
+  connection.query("SELECT * FROM employee", function (err, res) {
+    if (err) throw err;
+    // Log all results of the SELECT statement
+    console.table(res);
+    start();
+  });
+}
+function updateEmp() {
+  inquirer
+    .prompt([
+    {
+      name: "upRoleEmp",
+      type: "list",
+      //loop through job roles to pick role needed      
+      choices: function () {
+        connection.query()
+        const jobChoices = [];
+        for (var i = 0; i < results.length; i++) {
+          jobChoices.push(results[i].role_id);
+        }
+        return jobChoices;
+      },
+      message: "What's the role_id of the Employee you would like to update?",
+    },
+  ])
+  .then(function (answer) {
+    connection.query(
+        "INSERT INTO employee SET ?",
+        {
+          role_id: answer.upRoleEmp,
+        },
+        function (err) {
+            if (err) throw err;
+            console.log("Congratulations, your employee " + answer.upRoleEmp + " was updated.");
+            start();
+        },
+    )
+  });
+}
+  //--------------MALFUNCTION============updateDept Runs code but stops after the prompt with no response-----------
+/*function findEmployees(){
+  return connection.query(
+    "SELECT employee.id, employee.first_name, employee.last_name FROM employee"
+  )
+}
+async function updateEmp() {      
+    const employees = await findEmployees()
+  inquirer
+    .prompt([
+      {
+        name: "upFirstEmp",
+        type: "input",
+        message: "What's the first name of the Employee you would like to add?"
+      },
+      {
+        name: "upLastEmp",
+        type: "input",
+        message: "What's the last name of the New Employee you would like to add?"
+      },
+      {
+        name: "upRoleEmp",
+        type: "list",
+        message: "What's the role_id of the New Employee you would like to add?",
+        choices: jobChoices
+        
+      },
+      {
+        name: "newEmpBoss",
+        type: "list",
+        message: "What's the manager_id of the New Employee you would like to add?",
+        choices: bossChoices
+      }
+    ])
+    .then(function (answer) {
+      // when finished prompting, insert a new employee into the db with that info
+      connection.query(
+        "INSERT INTO employee SET ?",
+        {
+          first_name: answer.newFirstEmp,
+          last_name: answer.newLastEmp,
+          role_id: answer.newRoleEmp,
+          manager_id: answer.newEmpBoss
+        },
+        function (err) {
+          if (err) throw err;
+          console.log(`Congratulations, your new employee ${answer.newFirstEmp} ${answer.newLastEmp} was added.`);
+          start();
+        }
+      )
+    });
+}
+  connection.query("UPDATE employee SET ? WHERE ?",
+    [
+      {
+        first_name: first_name
+      },
+      {
+        last_name: last_name
+      },
+      {
+        role_id: 2
+      },
+      {
+        manager_id: 2
+      }
+    ],
+    function (err, res) {
+      if (err) throw err;
+      console.log(res.affectedRows + " department updated!\n");
+    }
+  );*/
+
 
 
 

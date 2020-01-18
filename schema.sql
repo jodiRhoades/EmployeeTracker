@@ -17,7 +17,7 @@ CREATE TABLE role (
   salary DECIMAL(10),
   department_id INT,  
   PRIMARY KEY (id),
-  FOREIGN KEY (department_id) REFERENCES department(departmentID)
+  FOREIGN KEY (department_id) REFERENCES department(id)
 );
 
 CREATE TABLE employee (
@@ -27,8 +27,8 @@ CREATE TABLE employee (
   role_id INT,
   manager_id INT,
   PRIMARY KEY (id),
-  FOREIGN KEY (role_id) REFERENCES role(roleID),
-  FOREIGN KEY (manager_id) REFERENCES role(managerID)
+  FOREIGN KEY (role_id) REFERENCES role(id),
+  FOREIGN KEY (manager_id) REFERENCES employee(id)
 );
 
 INSERT INTO department (name)
@@ -37,11 +37,11 @@ INSERT INTO department(name)
 VALUES ('SPA');
 
 INSERT INTO role (title, salary,department_id)
-VALUES ('massage therapist', 40.000, (SELECT department FROM id WHERE id = 'spa'));
+VALUES ('massage therapist', 40.000, 2);
 INSERT INTO role (title, salary, department_id)
-VALUES ("manager", 35.000, (SELECT department FROM id WHERE id = spa));
+VALUES ("manager", 35.000, 2);
 
-INSERT INTO employee (first_name, last_name, role_id, manager_id)
-VALUES ('Jodi', 'Rhoades', (SELECT id FROM role WHERE id = "massage therapist"), (SELECT manager_id FROM role WHERE department_id = 'spa'));
 INSERT INTO employee(first_name, last_name, role_id, manager_id)
-VALUES ('Trisha', 'Compton', (SELECT id FROM role WHERE id = manager_id), (SELECT id FROM role WHERE department_id = 'spa' ));
+VALUES ('Trisha', 'Compton', 2, null);
+INSERT INTO employee (first_name, last_name, role_id, manager_id)
+VALUES ('Jodi', 'Rhoades', 1, 1);
