@@ -275,110 +275,52 @@ function viewEmp() {
     start();
   });
 }
-function updateEmp() {
+async function updateEmp() {
+  //select which employee you want to update 
+  const roles = await findRoles()
+  const employees = await findEmployees()
+  const mappedEmployees = employees.map(({ id, first_name, last_name}) => ({
+    name: `${first_name} ${last_name}`,
+    value: id
+  }))
+  const mappedRoles = roles.map(({id, title})=>({
+    name: title,
+    value: id
+  }))
+
   inquirer
-    .prompt([
-    {
-      name: "upRoleEmp",
-      type: "list",
-      //loop through job roles to pick role needed      
-      choices: function () {
-        connection.query()
-        const jobChoices = [];
-        for (var i = 0; i < results.length; i++) {
-          jobChoices.push(results[i].role_id);
-        }
-        return jobChoices;
-      },
-      message: "What's the role_id of the Employee you would like to update?",
-    },
-  ])
-  .then(function (answer) {
-    connection.query(
-        "UPDATE INTO employee SET ?",
-        {
-          role_id: answer.upRoleEmp,
-        },
-        function (err) {
-            if (err) throw err;
-            console.log("Congratulations, your employee " + answer.upRoleEmp + " was updated.");
-            start();
-        },
-    )
-  });
-}
-  //--------------MALFUNCTION============updateDept Runs code but stops after the prompt with no response-----------
-/*function findEmployees(){
-  return connection.query(
-    "SELECT employee.id, employee.first_name, employee.last_name FROM employee"
-  )
-}
-async function updateEmp() {      
-    const employees = await findEmployees()
-  inquirer
-    .prompt([
+    .prompt([      
       {
-        name: "upFirstEmp",
-        type: "input",
-        message: "What's the first name of the Employee you would like to add?"
-      },
-      {
-        name: "upLastEmp",
-        type: "input",
-        message: "What's the last name of the New Employee you would like to add?"
+        name: "upEmp",
+        type: "list",
+        message: "What's the name of the employee you would like to update?",
+        //loop through employees to choose the one to be
+        choices: mappedEmployees,
       },
       {
         name: "upRoleEmp",
         type: "list",
-        message: "What's the role_id of the New Employee you would like to add?",
-        choices: jobChoices
-        
+        message: "What's the role_id of the employee you would like to update?",
+        //loop through managers to see which one will be thiers if they have one     
+        choices: mappedRoles,      
       },
-      {
-        name: "newEmpBoss",
-        type: "list",
-        message: "What's the manager_id of the New Employee you would like to add?",
-        choices: bossChoices
-      }
     ])
     .then(function (answer) {
       // when finished prompting, insert a new employee into the db with that info
       connection.query(
-        "INSERT INTO employee SET ?",
+        "UPDATE employee SET ?",
         {
-          first_name: answer.newFirstEmp,
-          last_name: answer.newLastEmp,
-          role_id: answer.newRoleEmp,
-          manager_id: answer.newEmpBoss
+          role_id: answer.upRoleEmp,
         },
         function (err) {
           if (err) throw err;
-          console.log(`Congratulations, your new employee ${answer.newFirstEmp} ${answer.newLastEmp} was added.`);
+          console.log(`Congratulations, your role_id was updated.`);
           start();
         }
       )
     });
 }
-  connection.query("UPDATE employee SET ? WHERE ?",
-    [
-      {
-        first_name: first_name
-      },
-      {
-        last_name: last_name
-      },
-      {
-        role_id: 2
-      },
-      {
-        manager_id: 2
-      }
-    ],
-    function (err, res) {
-      if (err) throw err;
-      console.log(res.affectedRows + " department updated!\n");
-    }
-  );*/
+
 
 
 
