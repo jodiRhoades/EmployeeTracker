@@ -212,8 +212,17 @@ function findEmployees(){
 }
 async function addEmp() {
   //select which employee you want to update 
+  const roles = await findRoles()
   const employees = await findEmployees()
-    
+  const mappedEmployees = employees.map(({ id, first_name, last_name}) => ({
+    name: `${first_name} ${last_name}`,
+    value: id
+  }))
+  const mappedRoles = roles.map(({id, title})=>({
+    name: title,
+    value: id
+  }))
+
   inquirer
     .prompt([
       {
@@ -231,26 +240,13 @@ async function addEmp() {
         type: "list",
         message: "What's the role_id of the New Employee you would like to add?",
         //loop through managers to see which one will be thiers if they have one     
-        choices: function () {
-          connection.query()
-          const jobChoices = [];
-          for (var i = 0; i < results.length; i++) {
-            jobChoices.push(results[i].role_id);
-          }
-          return jobChoices;
-        },      
+        choices: mappedRoles,      
       },
       {
         name: "newEmpBoss",
         type: "list",
         message: "What's the manager_id of the New Employee you would like to add?",
-        choices: function () {
-          const bossChoices = [];
-          for (var i = 0; i < results.length; i++) {
-            bossChoices.push(results[i].role_id);
-          }
-          return bossChoices;
-        },
+        choices: mappedEmployees,
       }
     ])
     .then(function (answer) {
@@ -272,7 +268,7 @@ async function addEmp() {
     });
 }
 function viewEmp() {
-  connection.query("SELECT * FROM employee", function (err, res) {
+  connection.query("SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name AS department, role.salary, CONCAT(manager.first_name, ' ', manager.last_name) AS manager FROM employee LEFT JOIN role on employee.role_id = role.id LEFT JOIN department on role.department_id = department.id LEFT JOIN employee manager on manager.id = employee.manager_id;", function (err, res) {
     if (err) throw err;
     // Log all results of the SELECT statement
     console.table(res);
@@ -299,7 +295,7 @@ function updateEmp() {
   ])
   .then(function (answer) {
     connection.query(
-        "INSERT INTO employee SET ?",
+        "UPDATE INTO employee SET ?",
         {
           role_id: answer.upRoleEmp,
         },
